@@ -71,6 +71,30 @@ public class MainController {
 
     }
 
+    @GetMapping("/products/search")
+    public String searchProducts(@RequestParam(required = false) String name,
+                                 @RequestParam(required = false) String price,
+                                 @RequestParam(required = false) Long categoryId,
+                                 @RequestParam(required = false) String status,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 Model model) {
+        Long priceValue = null;
+        try {
+            if (price != null && !price.isEmpty()) {
+                priceValue = Long.parseLong(price);
+            }
+        } catch (NumberFormatException e) {
+            // Xử lý khi giá trị price không hợp lệ
+        }
+
+        Page<Product> products = productService.searchProducts(name, priceValue, categoryId, status, page, PAGE_SIZE);
+        model.addAttribute("productList", products.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", products.getTotalPages());
+        model.addAttribute("categories", categoryService.findAllCategories());
+        return "home";
+    }
+
 
 }
 
