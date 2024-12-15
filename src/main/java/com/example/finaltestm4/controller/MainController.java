@@ -62,14 +62,34 @@ public class MainController {
         return "redirect:/";
     }
 
+    @PostMapping("/products/update")
+    public String updateProduct(@ModelAttribute("product") Product product,
+                                @RequestParam("categoryId") Long categoryId, // Nhận categoryId từ form
+                                RedirectAttributes redirectAttributes) {
+        // Tìm Category dựa trên ID
+        Category category = categoryService.findById(categoryId);
+        product.setCategory(category); // Gán category vào product
+
+        // Lưu thông tin sản phẩm đã chỉnh sửa
+        productService.saveProduct(product);
+
+        // Thêm thông báo
+        redirectAttributes.addFlashAttribute("message", "Product updated successfully");
+
+        return "redirect:/"; // Chuyển hướng về trang chủ
+    }
+
+
 
     @GetMapping("/products/{id}")
-    public String showEditForm(@PathVariable("id") Long id, Model model){
+    public String showEditForm(@PathVariable("id") Long id, Model model) {
         Product product = productService.findProductById(id);
+        List<Category> categories = categoryService.findAllCategories();
         model.addAttribute("product", product);
+        model.addAttribute("categories", categories); // Thêm danh sách categories
         return "editProduct";
-
     }
+
 
     @GetMapping("/products/search")
     public String searchProducts(@RequestParam(required = false) String name,
